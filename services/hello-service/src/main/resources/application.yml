@@ -1,0 +1,53 @@
+# Default application configuration
+spring:
+  application:
+    name: hello-service
+  profiles:
+    active: local
+
+# Server configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+
+# Actuator configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.sbxservice.hello: DEBUG
+    org.springframework: INFO
+
+# API documentation (Swagger/OpenAPI)
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+  packages-to-scan: com.sbxservice.hello.controller
+
+# Application specific configuration
+app:
+  greeting:
+    default-message: "Hello, World!" 

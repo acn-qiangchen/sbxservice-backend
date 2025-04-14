@@ -1,0 +1,24 @@
+# Local development environment configuration
+
+# Server configuration
+server:
+  port: 8080
+
+# Logging configuration for local development
+logging:
+  level:
+    com.sbxservice.hello: DEBUG
+    org.springframework.web: DEBUG
+
+# Development-specific settings
+spring:
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+# Application specific settings for local development
+app:
+  greeting:
+    default-message: "Hello, Local Development World!" 

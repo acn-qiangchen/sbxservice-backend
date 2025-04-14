@@ -1,0 +1,68 @@
+name: Build and Push to ECR
+
+on:
+  workflow_dispatch:
+    inputs:
+      services:
+        description: 'Services to build (comma-separated)'
+        required: true
+        default: 'hello-service'
+        type: string
+      aws_account:
+        description: 'AWS Account Number'
+        required: true
+        type: string
+      aws_region:
+        description: 'AWS Region'
+        required: true
+        default: 'us-east-1'
+        type: string
+  push:
+    branches: [ main ]
+    paths:
+      - 'services/**'
+      - '.github/workflows/docker-ecr.yml'
+
+env:
+  AWS_REGION: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+  ECR_REPOSITORY_PREFIX: sbxservice
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    strategy:
+      matrix:
+        service: ${{ fromJSON(format('[{0}]', github.event.inputs.services || '["hello-service"]')) }}
+      fail-fast: false
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ github.event.inputs.aws_account }}:role/github-actions-role
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: ./services/${{ matrix.service }}
+        push: true
+        tags: |
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_PREFIX }}-${{ matrix.service }}:${{ github.sha }}
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_PREFIX }}-${{ matrix.service }}:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max 
