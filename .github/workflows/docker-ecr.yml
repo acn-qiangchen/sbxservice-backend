@@ -3,11 +3,6 @@ name: Build and Push to ECR
 on:
   workflow_dispatch:
     inputs:
-      services:
-        description: 'Services to build (comma-separated)'
-        required: true
-        default: 'hello-service'
-        type: string
       aws_account:
         description: 'AWS Account Number'
         required: true
@@ -28,28 +23,19 @@ env:
   ECR_REPOSITORY_PREFIX: sbxservice
 
 jobs:
-  set-matrix:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - id: set-matrix
-        run: |
-          if [ -n "${{ github.event.inputs.services }}" ]; then
-            echo "matrix={\"service\":$(echo "${{ github.event.inputs.services }}" | jq -R 'split(",") | map(select(length > 0))')}" >> $GITHUB_OUTPUT
-          else
-            echo 'matrix={"service":["hello-service"]}' >> $GITHUB_OUTPUT
-          fi
-
   build-and-push:
-    needs: set-matrix
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
 
     strategy:
-      matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+      matrix:
+        service:
+          - hello-service
+          # Add more services here as needed
+          # - another-service
+          # - third-service
       fail-fast: false
 
     steps:
