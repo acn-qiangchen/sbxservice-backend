@@ -61,6 +61,12 @@ The Hello Service follows a layered architecture approach, common in Spring Boot
 - Sets up API information
 - Configures available server endpoints
 
+**WebConfig**: Configures web-related settings.
+- Enables CORS (Cross-Origin Resource Sharing) for all endpoints
+- Allows requests from any origin
+- Permits common HTTP methods (GET, POST, PUT, DELETE, etc.)
+- Sets appropriate caching headers
+
 ## Cross-Cutting Concerns
 
 ### Configuration Management
@@ -156,6 +162,7 @@ While this is a simple service with no explicit security mechanisms, in a produc
 - Implementing rate limiting
 - Adding HTTPS with proper certificate management
 - Evaluating information disclosure risks from server details
+- Restricting CORS to specific trusted domains instead of allowing all origins
 
 ## Scalability
 
