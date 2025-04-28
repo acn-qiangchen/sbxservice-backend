@@ -4,6 +4,8 @@
 
 Hello Service is a simple Spring Boot microservice that provides a "Hello World" API. It serves as the first microservice implementation in the sbxservice project.
 
+The service returns detailed information about both the client request and server environment along with the greeting message.
+
 ## Quick Start
 
 ### Prerequisites
@@ -156,9 +158,32 @@ sudo chmod 666 /var/run/docker.sock
 
 | Method | Endpoint | Description | Parameters |
 |--------|----------|-------------|------------|
-| GET | `/api/hello` | Returns a greeting message | `name` (optional): Name to include in greeting |
+| GET | `/api/hello` | Returns a detailed greeting message with request and server information | `name` (optional): Name to include in greeting |
 | GET | `/actuator/health` | Health check endpoint | None |
 | GET | `/swagger-ui.html` | API documentation UI | None |
+
+### Sample Response
+
+```json
+{
+  "message": "Hello, World!",
+  "timestamp": "2025-04-28T10:21:34.850734+09:00",
+  "userAgent": "curl/8.6.0",
+  "requestHeaders": {
+    "host": "localhost:8080",
+    "user-agent": "curl/8.6.0",
+    "accept": "*/*"
+  },
+  "serverInfo": {
+    "hostname": "server-hostname",
+    "javaVersion": "17.0.8",
+    "osName": "Linux",
+    "osVersion": "5.15.0",
+    "freeMemory": 256,
+    "totalMemory": 512
+  }
+}
+```
 
 ## Technology Stack
 

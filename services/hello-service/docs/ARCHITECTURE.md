@@ -27,7 +27,9 @@ The Hello Service follows a layered architecture approach, common in Spring Boot
 **HelloController**: Handles incoming HTTP requests and delegates to the service layer.
 - Exposed endpoints: `GET /api/hello`
 - Accepts optional "name" parameter
-- Returns a JSON response with a greeting message
+- Returns a JSON response with a detailed greeting message
+- Includes request context information (headers, user agent)
+- Includes server information (hostname, system properties)
 - Includes OpenAPI documentation annotations
 
 ### Service Layer
@@ -35,12 +37,22 @@ The Hello Service follows a layered architecture approach, common in Spring Boot
 **HelloService**: Contains the business logic for generating greeting messages.
 - Takes a name input and generates a personalized greeting
 - Returns a default greeting if no name is provided
+- Collects detailed system information including hostname, OS, and memory metrics
+- Extracts request header information
 - Configuration-driven default message
 
 ### Model Layer
 
 **GreetingResponse**: Represents the data structure returned by the API.
-- Contains a simple message field
+- Contains the greeting message
+- Includes request timestamp
+- Captures client information (user agent)
+- Contains a map of all request headers
+- Includes nested ServerInfo class with system details:
+  - Hostname
+  - Java version
+  - OS name and version
+  - Memory usage statistics (free/total)
 - Serialized to JSON in responses
 
 ### Configuration
@@ -64,6 +76,11 @@ Spring Boot Actuator provides built-in endpoints:
 - Metrics: `/actuator/metrics`
 - Info: `/actuator/info`
 
+The enhanced response model also provides additional observability into:
+- System metrics (memory usage)
+- Client request patterns (headers, user agents)
+- Runtime environment details
+
 ### API Documentation
 
 OpenAPI (Swagger) provides automatic API documentation:
@@ -82,10 +99,39 @@ OpenAPI (Swagger) provides automatic API documentation:
 
 1. Client sends a request to `GET /api/hello?name=John`
 2. Spring Web routes the request to `HelloController`
-3. Controller extracts the query parameter and calls `HelloService.generateGreeting("John")`
-4. Service applies business logic and returns "Hello, John!"
-5. Controller creates a `GreetingResponse` object with the message
-6. Spring converts the response to JSON and returns it to the client
+3. Controller extracts the query parameter and HttpServletRequest
+4. Controller calls `HelloService.generateDetailedGreeting("John", request)`
+5. Service generates greeting message and collects:
+   - Current timestamp
+   - Client's User-Agent header
+   - All request headers
+   - Server information (hostname, OS, Java version, memory metrics)
+6. Service returns a comprehensive `GreetingResponse` object
+7. Spring converts the response to JSON and returns it to the client
+
+## Example Response
+
+```json
+{
+  "message": "Hello, John!",
+  "timestamp": "2025-04-28T10:19:43.960502+09:00",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...",
+  "requestHeaders": {
+    "host": "localhost:8080",
+    "user-agent": "Mozilla/5.0 ...",
+    "accept": "application/json",
+    "accept-language": "en-US,en;q=0.9"
+  },
+  "serverInfo": {
+    "hostname": "app-server-1",
+    "javaVersion": "17.0.8",
+    "osName": "Linux",
+    "osVersion": "5.15.0-1031-aws",
+    "freeMemory": 256,
+    "totalMemory": 512
+  }
+}
+```
 
 ## Containerization
 
@@ -101,6 +147,7 @@ The application includes several types of tests:
 - **Unit Tests**: Test individual components in isolation
 - **Web Layer Tests**: Test controllers with mocked services
 - **Integration Tests**: Test the full application context
+- **Response Validation Tests**: Verify that all expected fields are present
 
 ## Security Considerations
 
@@ -108,6 +155,7 @@ While this is a simple service with no explicit security mechanisms, in a produc
 - Adding authentication using Spring Security
 - Implementing rate limiting
 - Adding HTTPS with proper certificate management
+- Evaluating information disclosure risks from server details
 
 ## Scalability
 
@@ -123,4 +171,6 @@ Potential improvements for this service:
 - Add metrics for business KPIs
 - Implement caching for high-volume scenarios
 - Add database integration for storing greetings
-- Implement circuit breakers for fault tolerance 
+- Implement circuit breakers for fault tolerance
+- Add client geolocation information
+- Track request processing time 

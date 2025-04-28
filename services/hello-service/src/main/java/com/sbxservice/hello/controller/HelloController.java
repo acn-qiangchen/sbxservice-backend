@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 /**
  * REST controller that exposes the hello API endpoint.
  */
@@ -32,21 +34,22 @@ public class HelloController {
     }
 
     /**
-     * Returns a greeting message.
+     * Returns a detailed greeting message with additional information.
      *
      * @param name optional name to include in the greeting
-     * @return a response entity containing the greeting message
+     * @param request the HTTP request for extracting headers and other information
+     * @return a response entity containing the detailed greeting
      */
     @GetMapping("/hello")
     @Operation(
-        summary = "Get a greeting message",
-        description = "Returns a customized greeting message based on the provided name. " +
-                     "If no name is provided, returns a default greeting."
+        summary = "Get a detailed greeting message",
+        description = "Returns a customized greeting message with additional information about the request and server. " +
+                     "Includes client's user agent, request timestamp, headers, and server details."
     )
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200",
-            description = "Greeting message generated successfully",
+            description = "Detailed greeting message generated successfully",
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = GreetingResponse.class)
@@ -55,9 +58,10 @@ public class HelloController {
     })
     public ResponseEntity<GreetingResponse> getGreeting(
             @Parameter(description = "Name to include in the greeting")
-            @RequestParam(required = false) String name) {
+            @RequestParam(required = false) String name,
+            HttpServletRequest request) {
         
-        String greeting = helloService.generateGreeting(name);
-        return ResponseEntity.ok(new GreetingResponse(greeting));
+        GreetingResponse response = helloService.generateDetailedGreeting(name, request);
+        return ResponseEntity.ok(response);
     }
 } 

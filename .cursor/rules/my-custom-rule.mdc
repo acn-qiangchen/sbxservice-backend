@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- always update document when after change the architecture. if you do not understand where the documentation is please ask user.
