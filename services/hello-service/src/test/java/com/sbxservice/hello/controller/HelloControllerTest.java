@@ -40,6 +40,7 @@ class HelloControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).contains("Hello");
+        verifyDetailedResponse(response.getBody());
     }
 
     @Test
@@ -54,6 +55,7 @@ class HelloControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).contains("John");
+        verifyDetailedResponse(response.getBody());
     }
 
     @Test
@@ -68,5 +70,27 @@ class HelloControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).contains("Hello");
+        verifyDetailedResponse(response.getBody());
+    }
+    
+    /**
+     * Helper method to verify that the detailed response contains all required information.
+     * 
+     * @param response the greeting response to verify
+     */
+    private void verifyDetailedResponse(GreetingResponse response) {
+        assertThat(response.getTimestamp()).isNotNull();
+        
+        // User agent may be null in test environment
+        // assertThat(response.getUserAgent()).isNotNull();
+        
+        assertThat(response.getRequestHeaders()).isNotNull();
+        
+        // Verify server info
+        assertThat(response.getServerInfo()).isNotNull();
+        assertThat(response.getServerInfo().getJavaVersion()).isNotEmpty();
+        assertThat(response.getServerInfo().getOsName()).isNotEmpty();
+        assertThat(response.getServerInfo().getOsVersion()).isNotEmpty();
+        assertThat(response.getServerInfo().getTotalMemory()).isGreaterThan(0);
     }
 } 

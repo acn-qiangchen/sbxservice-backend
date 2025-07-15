@@ -4,6 +4,10 @@
 
 Hello Service is a simple Spring Boot microservice that provides a "Hello World" API. It serves as the first microservice implementation in the sbxservice project.
 
+The service returns detailed information about both the client request and server environment along with the greeting message.
+
+It also includes CORS configuration to allow cross-origin requests from any domain.
+
 ## Quick Start
 
 ### Prerequisites
@@ -156,9 +160,42 @@ sudo chmod 666 /var/run/docker.sock
 
 | Method | Endpoint | Description | Parameters |
 |--------|----------|-------------|------------|
-| GET | `/api/hello` | Returns a greeting message | `name` (optional): Name to include in greeting |
+| GET | `/api/hello` | Returns a detailed greeting message with request and server information | `name` (optional): Name to include in greeting |
 | GET | `/actuator/health` | Health check endpoint | None |
 | GET | `/swagger-ui.html` | API documentation UI | None |
+
+### CORS Support
+
+The API supports Cross-Origin Resource Sharing (CORS) with the following configuration:
+- All origins allowed (`*`)
+- Supported methods: GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH
+- All headers allowed
+- Max age: 3600 seconds (1 hour)
+
+This allows you to call the API from any domain, including from browsers, without CORS errors.
+
+### Sample Response
+
+```json
+{
+  "message": "Hello, World!",
+  "timestamp": "2025-04-28T10:21:34.850734+09:00",
+  "userAgent": "curl/8.6.0",
+  "requestHeaders": {
+    "host": "localhost:8080",
+    "user-agent": "curl/8.6.0",
+    "accept": "*/*"
+  },
+  "serverInfo": {
+    "hostname": "server-hostname",
+    "javaVersion": "17.0.8",
+    "osName": "Linux",
+    "osVersion": "5.15.0",
+    "freeMemory": 256,
+    "totalMemory": 512
+  }
+}
+```
 
 ## Technology Stack
 
