@@ -4,6 +4,9 @@ spring:
     name: hello-service
   profiles:
     active: local
+  jackson:
+    serialization:
+      indent-output: true  # Enable pretty printing globally
 
 # Server configuration
 server:

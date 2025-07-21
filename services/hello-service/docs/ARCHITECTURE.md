@@ -75,6 +75,25 @@ The application uses Spring's property management with profile-based configurati
 - `application.yml`: Default configuration
 - `application-{profile}.yml`: Environment-specific settings
 
+#### JSON Configuration
+
+The service uses Jackson for JSON serialization with the following configurations:
+
+**Pretty Printing**: 
+- JSON responses are pretty-printed (indented) globally across all environments for better readability and debugging
+- This applies to all JSON responses from the service, making complex nested objects like `GreetingResponse` easier to read
+
+Configuration is managed through Spring Boot's Jackson properties:
+```yaml
+spring:
+  jackson:
+    serialization:
+      indent-output: true  # Enable pretty printing globally
+```
+
+**Response Format**:
+- All JSON responses are formatted with multi-line, indented output for improved readability
+
 ### Monitoring and Observability
 
 Spring Boot Actuator provides built-in endpoints:
