@@ -13,10 +13,10 @@ RUN mvn clean package -DskipTests
 # Runtime stage
 FROM amazoncorretto:17-al2023-jdk
 WORKDIR /app
+# Install shadow-utils (provides groupadd/useradd) and curl for healthcheck
+RUN yum update -y && yum install -y shadow-utils curl && yum clean all
 # Add a non-root user
 RUN groupadd -r spring && useradd -r -g spring spring
-# Install curl for healthcheck
-RUN yum update -y && yum install -y curl && yum clean all
 USER spring:spring
 # Copy the JAR file from the build stage
 COPY --from=builder /app/target/*.jar app.jar
