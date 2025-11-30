@@ -13,8 +13,9 @@ RUN mvn clean package -DskipTests
 # Runtime stage
 FROM amazoncorretto:17-al2023-jdk
 WORKDIR /app
-# Install shadow-utils (provides groupadd/useradd) and curl for healthcheck
-RUN yum update -y && yum install -y shadow-utils curl && yum clean all
+# Install shadow-utils (provides groupadd/useradd)
+# Note: curl-minimal is already installed for healthcheck
+RUN yum update -y && yum install -y shadow-utils && yum clean all
 # Add a non-root user
 RUN groupadd -r spring && useradd -r -g spring spring
 USER spring:spring
