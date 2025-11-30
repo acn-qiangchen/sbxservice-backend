@@ -162,7 +162,7 @@ OpenAPI (Swagger) provides automatic API documentation:
 
 The application is containerized using Docker:
 - Multi-stage build for optimization
-- Base image: Eclipse Temurin JRE 17 Alpine
+- Base image: Amazon Corretto 17 JDK on Amazon Linux 2023
 - Health checks configured
 - JVM optimized for containerized environments
 

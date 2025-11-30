@@ -55,7 +55,7 @@ For the simplest development experience, use VS Code with Dev Containers:
 
 3. Create `.devcontainer/Dockerfile` (optimized for development):
 ```dockerfile
-FROM maven:3.8-openjdk-17
+FROM maven:3.8-amazoncorretto-17
 
 # Create a non-root user
 RUN groupadd -r spring && useradd -r -g spring spring
