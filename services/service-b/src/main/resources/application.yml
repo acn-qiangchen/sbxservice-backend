@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: service-b
+  jackson:
+    serialization:
+      indent-output: true
+
+server:
+  port: 8082
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+  tomcat:
+    # KEY for 502 demo: Tomcat closes idle keep-alive connections after 5s.
+    # service-a's connection pool holds connections for 30s (keep-alive.idle-timeout-ms: 30000).
+    # When service-a reuses a connection that Tomcat already closed → 502 Bad Gateway.
+    keep-alive-timeout: 5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.sbxservice.serviceb: DEBUG
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+  packages-to-scan: com.sbxservice.serviceb.controller

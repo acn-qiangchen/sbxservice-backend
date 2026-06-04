@@ -1,0 +1,85 @@
+version: '3.8'
+
+# Shared docker-compose — runs service-a + service-b together for the 502/503/504 demo.
+#
+# Usage:
+#   cd services/
+#   docker-compose up --build
+#
+# Demo scenarios (after both containers are healthy):
+#
+#   Happy path:
+#     curl http://localhost:8081/api/call
+#
+#   Check active config first:
+#     curl http://localhost:8081/api/config
+#
+#   504 Gateway Timeout  — service-b sleeps 10s, service-a read-timeout is 5s:
+#     curl -v http://localhost:8081/api/call-slow?delayMs=10000
+#
+#   503 Service Unavailable  — stop service-b:
+#     docker stop service-b
+#     curl -v http://localhost:8081/api/call
+#     docker start service-b
+#
+#   502 Bad Gateway  — stale keep-alive connection:
+#     curl http://localhost:8081/api/call   # warms the connection pool
+#     sleep 6                               # service-b closes keep-alive after 5s
+#     curl -v http://localhost:8081/api/call  # service-a reuses stale connection → 502
+#
+# Environment overrides (no rebuild needed):
+#   Lower read timeout to make 504 easier to trigger:
+#     APP_HTTP_CLIENT_READ_TIMEOUT_MS=2000 docker-compose up service-a service-b
+#
+#   Point service-a at a non-existent host to trigger 503 without stopping service-b:
+#     APP_HTTP_CLIENT_BASE_URL=http://nonexistent:9999 docker-compose up service-a service-b
+
+services:
+
+  service-b:
+    build:
+      context: ./service-b
+      dockerfile: Dockerfile
+    container_name: service-b
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
+    networks:
+      - demo-network
+
+  service-a:
+    build:
+      context: ./service-a
+      dockerfile: Dockerfile
+    container_name: service-a
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - JAVA_OPTS=-Xmx512m -Xms256m
+      # Docker's internal DNS resolves 'service-b' to the container's IP on demo-network.
+      # Override with APP_HTTP_CLIENT_BASE_URL to point at a different host.
+      - APP_HTTP_CLIENT_BASE_URL=http://service-b:8082
+    depends_on:
+      service-b:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
+    networks:
+      - demo-network
+
+networks:
+  demo-network:
+    driver: bridge
